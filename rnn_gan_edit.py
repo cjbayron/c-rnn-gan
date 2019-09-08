@@ -268,6 +268,7 @@ class RNNGAN(object):
 
     print('songlength: {}'.format(self.songlength))
     self._input_songdata = tf.placeholder(shape=[batch_size, songlength, num_song_features], dtype=data_type())
+    self._input_metadata = tf.placeholder(shape=[batch_size, num_meta_features], dtype=data_type())
     #_split = tf.split(self._input_songdata,songlength,1)[0]
     print("self._input_songdata",self._input_songdata, 'songlength',songlength)
     #print(tf.squeeze(_split,[1]))
@@ -486,6 +487,10 @@ class RNNGAN(object):
     return self._generated_features
 
   @property
+  def input_metadata(self):
+    return self._input_metadata
+
+  @property
   def input_songdata(self):
     return self._input_songdata
 
@@ -634,7 +639,7 @@ def main(_):
   if not FLAGS.traindir:
     raise ValueError("Must set --traindir to dir where I can save model and plots.")
  
-  restore_flags()
+  # restore_flags()
  
   summaries_dir = None
   plots_dir = None
@@ -661,17 +666,7 @@ def main(_):
       global_step = pkl.load(f)
   global_step += 1
 
-  songfeatures_filename = os.path.join(FLAGS.traindir, 'num_song_features.pkl')
-  metafeatures_filename = os.path.join(FLAGS.traindir, 'num_meta_features.pkl')
-  synthetic=None
-  if FLAGS.synthetic_chords:
-    synthetic = 'chords'
-    print('Training on synthetic chords!')
-  loader = music_data_utils.MusicDataLoader(FLAGS.datadir, FLAGS.select_validation_percentage, FLAGS.select_test_percentage, FLAGS.works_per_composer, FLAGS.pace_events, synthetic=synthetic, tones_per_cell=FLAGS.tones_per_cell, single_composer=FLAGS.composer)
-  if FLAGS.synthetic_chords:
-    # This is just a print out, to check the generated data.
-    batch = loader.get_batch(batchsize=1, songlength=400)
-    loader.get_midi_pattern([batch[1][0][i] for i in xrange(batch[1].shape[1])])
+  loader = music_data_utils.MusicDataLoader(FLAGS.datadir, FLAGS.pace_events, tones_per_cell=FLAGS.tones_per_cell, single_composer=FLAGS.composer)
 
   num_song_features = loader.get_num_song_features()
   print('num_song_features:{}'.format(num_song_features))
