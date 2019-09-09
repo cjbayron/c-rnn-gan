@@ -310,6 +310,7 @@ class RNNGAN(object):
 
         if len(concat_values):
           input_ = tf.concat(axis=1, values=concat_values)
+
         input_ = tf.nn.relu(linear(input_, FLAGS.hidden_size_g,
                             scope='input_layer', reuse_scope=(i!=0)))
         output, state = cell(input_, state)
